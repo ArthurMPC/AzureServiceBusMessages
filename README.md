@@ -25,3 +25,8 @@ Configure ServiceBusEndpoint and QueuePath on */AzureServiceBusMessages/Settings
 #Second Step: 
 Use Multiple Startup Projects for Sender and Receiver.
 ```
+
+### Azure ServiceBus Package
+NuGet: https://www.nuget.org/packages/Microsoft.Azure.ServiceBus
+SourceCode: https://github.com/Azure/azure-sdk-for-net/tree/Microsoft.Azure.ServiceBus_5.1.0
+
