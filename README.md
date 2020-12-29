@@ -23,7 +23,7 @@ Using Visual Studio:
 Configure ServiceBusEndpoint and QueuePath on */AzureServiceBusMessages/Settings.cs*
 
 #Second Step: 
-Use Multiple Startup Projects for Sender and Receiver.
+Use Debbuging with Multiple Startup Projects for Sender and Receiver.
 ```
 
 ### Azure ServiceBus Package
