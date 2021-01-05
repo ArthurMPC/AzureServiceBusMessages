@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Microsoft.Azure.ServiceBus.Management;
+using System.Collections.Generic;
 
 namespace AzureServiceBusMessages.Sender
 {
@@ -17,6 +18,35 @@ namespace AzureServiceBusMessages.Sender
             Console.WriteLine("Press enter to order Peanuts!"); 
             Console.ReadLine();
 
+            //SendSingleOrder();
+            SendMultipleOrder(1000);
+
+        }
+
+        static void SendMultipleOrder(int count)
+        {
+            int id = 0;
+            var randomNut = new Random();
+
+            List<NutOrder> orders = new List<NutOrder>();
+
+            for(int i = 0; i < count; i++)
+            {
+                int nutType = randomNut.Next(0, 4);
+                int weight = randomNut.Next(0, 5);
+
+                NutOrder nutOrder = new NutOrder()
+                { Id = id, Merchant = "Tungo", DeliveryAddress = "Rua Feliz 123", NutType = (NutType)nutType, Weight = weight };
+
+                orders.Add(nutOrder);
+            }
+
+            SimpleOrderSenderAsync(orders).Wait();
+                
+        }
+
+        static void SendSingleOrder()
+        {
             int id = 0;
             var randomNut = new Random();
 
@@ -26,7 +56,7 @@ namespace AzureServiceBusMessages.Sender
                 int weight = randomNut.Next(0, 5);
 
                 NutOrder nutOrder = new NutOrder()
-                { Id = id, Merchant = "Tungo", DeliveryAddress = "Rua Feliz 123", NutType = (NutType)nutType, Weight = weight};
+                { Id = id, Merchant = "Tungo", DeliveryAddress = "Rua Feliz 123", NutType = (NutType)nutType, Weight = weight };
 
                 SimpleOrderSenderAsync(nutOrder).Wait();
                 id++;
@@ -61,6 +91,50 @@ namespace AzureServiceBusMessages.Sender
                 await client.CloseAsync();
             }            
 
+        }
+
+        static async Task SimpleOrderSenderAsync(List<NutOrder> nutOrder)
+        {
+            WriteLine("Sending NutOrder to Godoy's Shop", ConsoleColor.Cyan);
+            //WriteLine($"{nutOrder.ToString()}", ConsoleColor.DarkYellow);
+
+            // Create a client
+            var client = new QueueClient(Settings.ConnectionString, Settings.QueueName);
+
+            try
+            {
+                WriteLine("Sending...", ConsoleColor.Green);
+
+                List<Message> messages = ObjectToMessages(nutOrder);
+
+                await client.SendAsync(messages);
+
+                WriteLine("Done!", ConsoleColor.Green);
+
+                Console.WriteLine();
+            }
+            finally
+            {
+                // Always close the client
+                await client.CloseAsync();
+            }
+
+        }
+
+        static List<Message> ObjectToMessages<T>(List<T> objects)
+        {
+            List<Message> messages = new List<Message>();
+
+            foreach(T obj in objects)
+            {
+                string jsonNutOrder = JsonConvert.SerializeObject(obj);
+
+                var message = new Message(Encoding.UTF8.GetBytes(jsonNutOrder));
+
+                messages.Add(message);
+            }
+
+            return messages;
         }
 
         static async Task RecreateQueueAsync()
